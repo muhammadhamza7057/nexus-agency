@@ -30,17 +30,22 @@ export default function Testimonials() {
         </div>
 
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '24px',
-          maxWidth: '1300px',
-          margin: '0 auto',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-        }} className="testimonials-grid">
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'stretch',
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '32px',
+            maxWidth: '1400px',
+            width: '100%',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+          }} className="testimonials-grid">
           {testimonials.map((t, i) => (
             <div key={i} className="testimonial-card" style={{
-              padding: 'clamp(24px, 5vw, 48px)',
+              padding: 'clamp(32px, 6vw, 56px)',
               border: '1px solid rgba(255, 255, 255, 0.06)',
               borderRadius: '16px',
               background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)',
@@ -51,6 +56,7 @@ export default function Testimonials() {
               transition: `all 0.6s ${i * 0.12}s ease`,
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               overflow: 'hidden',
+              minHeight: '100%',
             }}>
               {/* Decorative top border accent */}
               <div style={{
@@ -119,6 +125,7 @@ export default function Testimonials() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
 
@@ -136,13 +143,13 @@ export default function Testimonials() {
         }
 
         @media (max-width: 1024px) { 
-          .testimonials-grid { grid-template-columns: repeat(2, 1fr) !important; } 
+          .testimonials-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 32px !important; } 
           .testimonial-card:hover {
             transform: translateY(-6px) !important;
           }
         }
         @media (max-width: 768px) { 
-          .testimonials-grid { grid-template-columns: 1fr !important; gap: 20px !important; paddingLeft: 16px !important; paddingRight: 16px !important; } 
+          .testimonials-grid { grid-template-columns: 1fr !important; gap: 24px !important; paddingLeft: 16px !important; paddingRight: 16px !important; } 
           .testimonial-card:hover {
             transform: translateY(-4px) !important;
           }
