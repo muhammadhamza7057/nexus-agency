@@ -48,10 +48,12 @@ export default function About() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 360px))',
+          justifyContent: 'center',
           gap: '32px',
-          maxWidth: '1200px',
+          maxWidth: '820px',
           margin: '0 auto',
+          width: '100%',
         }}>
           {team.map((member, index) => (
             <div
@@ -67,6 +69,7 @@ export default function About() {
                 transform: isVisible ? 'none' : 'translateY(40px)',
                 transition: `all 0.6s ${0.3 + index * 0.1}s ease`,
                 cursor: 'pointer',
+                width: '100%',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px)';

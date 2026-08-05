@@ -7,7 +7,7 @@ export default function Testimonials() {
   return (
     <section id="testimonials" style={{ padding: '120px 0' }}>
       <div className="container">
-        <div ref={ref} style={{ marginBottom: '80px' }}>
+        <div ref={ref} style={{ marginBottom: '80px', textAlign: 'center' }}>
           <p style={{
             fontSize: '12px', letterSpacing: '0.15em', color: 'var(--accent)',
             textTransform: 'uppercase', fontFamily: 'var(--font-display)',
@@ -33,6 +33,8 @@ export default function Testimonials() {
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap: '24px',
+          maxWidth: '1200px',
+          margin: '0 auto',
         }} className="testimonials-grid">
           {testimonials.map((t, i) => (
             <div key={i} style={{
