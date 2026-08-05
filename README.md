@@ -56,6 +56,18 @@ npm run build
 npm run preview
 ```
 
+## 🚀 Deploy to Vercel
+
+This repo is configured for a straightforward Vercel deploy:
+
+1. Push the latest `main` branch to GitHub.
+2. Import the repository in Vercel.
+3. Leave the build command as `npm run build`.
+4. Leave the output directory as `dist`.
+5. Deploy.
+
+The included `vercel.json` already sets the build command and output directory.
+
 ## ✏️ Customizing Content
 
 All site content lives in `src/data/siteData.js`:
