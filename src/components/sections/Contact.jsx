@@ -68,15 +68,20 @@ export default function Contact() {
             Tell us about your project and we'll come back with a free proposal within 48 hours.
           </p>
           <a href="https://mail.google.com/mail/?view=cm&fs=1&to=codingexpert098@gmail.com" style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            padding: '18px 48px',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            width: '100%',
+            maxWidth: '420px',
+            padding: '18px 24px',
             background: 'var(--accent)',
             color: '#080808',
             borderRadius: 'var(--radius)',
             fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            fontSize: '18px',
+            fontSize: 'clamp(14px, 3.8vw, 18px)',
+            textAlign: 'center',
+            wordBreak: 'break-word',
             transition: 'all var(--transition)',
+            boxSizing: 'border-box',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(200,240,77,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
@@ -96,10 +101,6 @@ export default function Contact() {
             <a href="tel:+923008925097" style={{
               padding: '10px 18px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '8px', textDecoration: 'none', fontWeight: 600
             }}>+92 300 8925097</a>
-
-            <a href="https://wa.me/923427057124" target="_blank" rel="noopener noreferrer" style={{
-              padding: '10px 18px', background: 'var(--accent)', color: '#080808', borderRadius: '8px', textDecoration: 'none', fontWeight: 700
-            }}>WhatsApp →</a>
           </div>
         </div>
 
@@ -240,7 +241,9 @@ export default function Contact() {
       </div>
 
       <style>{`
-        @media (max-width: 600px) { .contact-form { grid-template-columns: 1fr !important; } }
+        @media (max-width: 600px) {
+          .contact-form { grid-template-columns: 1fr !important; }
+        }
       `}</style>
     </section>
   );
