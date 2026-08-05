@@ -36,9 +36,10 @@ export default function Testimonials() {
         }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '32px',
-            maxWidth: '1400px',
+            gridTemplateColumns: 'repeat(2, minmax(0, 420px))',
+            justifyContent: 'center',
+            gap: 'clamp(24px, 3vw, 40px)',
+            maxWidth: '960px',
             width: '100%',
             paddingLeft: '20px',
             paddingRight: '20px',
@@ -143,13 +144,13 @@ export default function Testimonials() {
         }
 
         @media (max-width: 1024px) { 
-          .testimonials-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 32px !important; } 
+          .testimonials-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 32px !important; max-width: 100% !important; } 
           .testimonial-card:hover {
             transform: translateY(-6px) !important;
           }
         }
         @media (max-width: 768px) { 
-          .testimonials-grid { grid-template-columns: 1fr !important; gap: 24px !important; paddingLeft: 16px !important; paddingRight: 16px !important; } 
+          .testimonials-grid { grid-template-columns: 1fr !important; gap: 24px !important; padding-left: 16px !important; padding-right: 16px !important; } 
           .testimonial-card:hover {
             transform: translateY(-4px) !important;
           }
