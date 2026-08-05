@@ -71,10 +71,11 @@ export default function Process() {
                 fontFamily: 'var(--font-display)',
                 fontSize: '48px',
                 fontWeight: 800,
-                color: 'var(--border-light)',
+                color: 'var(--accent)',
                 lineHeight: 1,
                 marginBottom: '24px',
                 letterSpacing: '-0.04em',
+                textShadow: '0 0 18px rgba(200, 240, 77, 0.18)',
               }}>
                 {String(i + 1).padStart(2, '0')}
               </div>
