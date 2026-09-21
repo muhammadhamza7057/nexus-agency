@@ -185,18 +185,12 @@ export default function Hero() {
             </div>
           ))}
         </div>
+        <br />
+        <br />
+        <br />
       </div>
 
-      {/* Scroll indicator */}
-      <div style={{
-        position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-        opacity: 0.4,
-        animation: 'fadeIn 1s 1s ease both',
-      }}>
-        <span style={{ fontSize: '11px', letterSpacing: '0.15em', color: 'var(--text-secondary)' }}>SCROLL</span>
-        <div style={{ width: '1px', height: '40px', background: 'linear-gradient(to bottom, var(--text-secondary), transparent)' }} />
-      </div>
+    
     </section>
   );
 }
