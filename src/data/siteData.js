@@ -88,7 +88,7 @@ export const testimonials = [
   {
     quote: "They shipped our MVP in 6 weeks and it survived our Product Hunt launch without a single outage. Rare.",
     author: "Aizaz Ahmed",
-    role: "Web Developer, UI/UX Designer",
+    role: "Full Stack Web Developer, UI/UX Designer",
     avatar: "AA",
   },
   {
