@@ -57,16 +57,8 @@ export default function Hero() {
       }} />
 
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-        {/* Badge */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '8px',
-          border: '1px solid var(--border-light)',
-          borderRadius: '100px', padding: '6px 16px',
-          marginBottom: '48px',
-          animation: 'fadeUp 0.6s ease forwards',
-        }}>
-         
-        </div>
+       <br/>
+       
 
         {/* Headline */}
         <h1 style={{
