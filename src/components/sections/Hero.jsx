@@ -65,10 +65,7 @@ export default function Hero() {
           marginBottom: '48px',
           animation: 'fadeUp 0.6s ease forwards',
         }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', animation: 'pulse 2s infinite' }} />
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>
-            Available for new projects — Q2 2025
-          </span>
+         
         </div>
 
         {/* Headline */}
