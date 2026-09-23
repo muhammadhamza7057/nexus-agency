@@ -56,7 +56,6 @@ export default function Services() {
                 gridTemplateColumns: '80px 1fr auto',
                 gap: '40px',
                 alignItems: 'center',
-                padding: '40px 0',
                 borderTop: '1px solid var(--border)',
                 cursor: 'default',
                 transition: 'all var(--transition)',
@@ -136,7 +135,7 @@ export default function Services() {
                   transform: hovered === service.id ? 'rotate(-45deg)' : 'none',
                   transition: 'transform var(--transition)',
                 }}>
-                  <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke={hovered === service.id ? service.color : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke={hovered === service.id ? service.color : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
             </div>

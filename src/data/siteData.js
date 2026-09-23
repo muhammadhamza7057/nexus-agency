@@ -131,7 +131,7 @@ export const faqs = [
 export const team = [
   {
     name: 'Aizaz Ahmed',
-    role: 'Web Dev & UI/UX Designer',
+    role: 'Full Stack Web Dev & UI/UX Designer',
     bio: 'Designs intuitive user interfaces and develops responsive, user-friendly websites with a focus on great user experience and modern design.',
     image: '/images/team/AIZAZ.png',
   },
