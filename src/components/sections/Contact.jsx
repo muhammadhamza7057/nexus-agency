@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import CalendlyEmbed from './CalendlyEmbed';
+import { contactConfig } from '../../data/siteData';
 
 /* ─── tiny icon helpers ─────────────────────────────────────────── */
 const IconUser = () => (
@@ -19,6 +21,14 @@ const IconCoin = () => (
 const IconMsg = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+const IconCalendar = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
 const IconArrow = () => (
@@ -64,7 +74,6 @@ const baseInput = {
   fontFamily: 'var(--font-body)',
   outline: 'none',
   transition: 'border-color 0.25s, background 0.25s, box-shadow 0.25s',
-  /* kill browser autofill chrome icon */
   WebkitTextFillColor: 'var(--text-primary)',
 };
 
@@ -84,8 +93,10 @@ const budgets = ['$5k – $10k', '$10k – $25k', '$25k – $50k', '$50k+'];
 
 /* ─── main component ────────────────────────────────────────────── */
 export default function Contact() {
+  const [activeTab, setActiveTab] = useState('form'); // 'form' | 'calendly'
   const [form, setForm] = useState({ name: '', email: '', budget: '', message: '' });
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState('idle'); // 'idle' | 'submitting' | 'success' | 'error'
+  const [errorMessage, setErrorMessage] = useState('');
   const [errors, setErrors] = useState({});
 
   const nameField = useField();
@@ -102,8 +113,45 @@ export default function Contact() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (validate()) setSubmitted(true);
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!validate()) return;
+
+    setStatus('submitting');
+    setErrorMessage('');
+
+    try {
+      const endpoint = contactConfig.formEndpoint || 'https://formsubmit.co/ajax/codingexpert098@gmail.com';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          budget: form.budget,
+          message: form.message,
+          _subject: `New Project Inquiry from ${form.name} (${form.budget})`,
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (response.ok) {
+        setStatus('success');
+        setForm({ name: '', email: '', budget: '', message: '' });
+      } else {
+        throw new Error(data?.message || 'Submission failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Contact form submission error:', err);
+      setErrorMessage(err.message || 'Network error occurred. Please try again or email us directly.');
+      setStatus('error');
+    }
   };
 
   return (
@@ -113,7 +161,7 @@ export default function Contact() {
         {/* ── Big CTA banner ─────────────────────────────────────── */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '100px',
+          marginBottom: '90px',
           padding: '90px 40px',
           borderRadius: '20px',
           border: '1px solid rgba(200,240,77,0.15)',
@@ -125,17 +173,17 @@ export default function Contact() {
           <div style={{
             position: 'absolute', top: '-60px', right: '-60px', width: '320px', height: '320px',
             background: 'radial-gradient(circle, rgba(200,240,77,0.12) 0%, transparent 70%)',
-            borderRadius: '50%', pointerEvents: 'none'
+            borderRadius: '50%', pointerEvents: 'none',
           }} />
           <div style={{
             position: 'absolute', bottom: '-40px', left: '-40px', width: '240px', height: '240px',
             background: 'radial-gradient(circle, rgba(77,166,255,0.08) 0%, transparent 70%)',
-            borderRadius: '50%', pointerEvents: 'none'
+            borderRadius: '50%', pointerEvents: 'none',
           }} />
 
           <p style={{
             fontSize: '12px', letterSpacing: '0.15em', color: 'var(--accent)',
-            textTransform: 'uppercase', fontFamily: 'var(--font-display)', marginBottom: '24px'
+            textTransform: 'uppercase', fontFamily: 'var(--font-display)', marginBottom: '24px',
           }}>
             Let's Build Together
           </p>
@@ -145,221 +193,404 @@ export default function Contact() {
           }}>
             Got an idea?<br /><span style={{ color: 'var(--accent)' }}>We're all ears.</span>
           </h2>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 48px', lineHeight: 1.7 }}>
-            Tell us about your project — we'll respond with a free proposal within 48 hours.
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '520px', margin: '0 auto 44px', lineHeight: 1.7, fontSize: '17px' }}>
+            Tell us about your project — we'll respond with a free proposal within 48 hours, or schedule an instant discovery call.
           </p>
-          <a href="mailto:hello@nexus.studio" style={{
-            display: 'inline-flex', alignItems: 'center', gap: '10px',
-            padding: '18px 48px', background: 'var(--accent)', color: '#080808',
-            borderRadius: '8px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px',
-            transition: 'all 0.3s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(200,240,77,0.35)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            <IconMail /> hello@nexus.studio
-          </a>
+
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a
+              href={`mailto:${contactConfig.displayEmail || 'hello@nexus.studio'}`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                padding: '18px 40px', background: 'var(--accent)', color: '#080808',
+                borderRadius: '8px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(200,240,77,0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <IconMail /> {contactConfig.displayEmail || 'hello@nexus.studio'}
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('calendly');
+                document.getElementById('contact-hub')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                padding: '18px 40px', background: 'rgba(255,255,255,0.04)', color: 'var(--text-primary)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '8px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.transform = 'none'; }}
+            >
+              <IconCalendar /> Book a Discovery Call
+            </button>
+          </div>
         </div>
 
-        {/* ── Form card ──────────────────────────────────────────── */}
-        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+        {/* ── Interactive Hub (Form & Calendly) ───────────────────── */}
+        <div id="contact-hub" style={{ maxWidth: '820px', margin: '0 auto' }}>
+
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h3 style={{
               fontFamily: 'var(--font-display)', fontWeight: 800,
               fontSize: 'clamp(28px, 4vw, 42px)', letterSpacing: '-0.03em', marginBottom: '12px',
             }}>
-              Or fill out the form
+              How would you like to connect?
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
-              We read every message and reply within one business day.
+              Send an async project brief or lock in an immediate calendar slot with our tech leads.
             </p>
           </div>
 
-          {submitted ? (
-            /* ── success state ── */
-            <div style={{
-              textAlign: 'center', padding: '80px 40px',
-              border: '1px solid rgba(200,240,77,0.25)',
-              borderRadius: '20px',
-              background: 'linear-gradient(135deg, rgba(200,240,77,0.06), transparent)',
-              animation: 'fadeUp 0.5s ease',
-            }}>
-              <div style={{ color: 'var(--accent)', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                <IconCheck />
-              </div>
-              <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '26px', marginBottom: '12px', color: 'var(--accent)' }}>
-                Message Sent!
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
-                We'll be in touch within 48 hours. Check your inbox.
-              </p>
-            </div>
-          ) : (
-            /* ── form ── */
-            <div style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: '20px',
-              padding: 'clamp(32px, 5vw, 56px)',
-              backdropFilter: 'blur(12px)',
-            }}>
-              {/* suppress browser autofill styles globally for this block */}
-              <style>{`
-                input:-webkit-autofill,
-                input:-webkit-autofill:hover,
-                input:-webkit-autofill:focus {
-                  -webkit-box-shadow: 0 0 0 1000px #111 inset !important;
-                  -webkit-text-fill-color: var(--text-primary) !important;
-                  caret-color: var(--text-primary);
-                }
-                /* hide the native email suggestion icon */
-                input[type="email"]::-webkit-contacts-auto-fill-button,
-                input[type="email"]::-webkit-credentials-auto-fill-button {
-                  visibility: hidden;
-                  display: none !important;
-                  pointer-events: none;
-                }
-                @media (max-width: 600px) { .form-row { flex-direction: column !important; } }
-              `}</style>
+          {/* ── Tab Switcher ── */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '12px',
+            marginBottom: '36px',
+            flexWrap: 'wrap',
+          }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('form')}
+              style={{
+                padding: '13px 28px',
+                borderRadius: '100px',
+                border: activeTab === 'form' ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                background: activeTab === 'form' ? 'var(--accent)' : 'rgba(255,255,255,0.03)',
+                color: activeTab === 'form' ? '#080808' : 'var(--text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: '15px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.25s ease',
+                boxShadow: activeTab === 'form' ? '0 10px 30px rgba(200,240,77,0.25)' : 'none',
+              }}
+            >
+              <IconMsg />
+              Send a Message
+            </button>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('calendly')}
+              style={{
+                padding: '13px 28px',
+                borderRadius: '100px',
+                border: activeTab === 'calendly' ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                background: activeTab === 'calendly' ? 'var(--accent)' : 'rgba(255,255,255,0.03)',
+                color: activeTab === 'calendly' ? '#080808' : 'var(--text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: '15px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.25s ease',
+                boxShadow: activeTab === 'calendly' ? '0 10px 30px rgba(200,240,77,0.25)' : 'none',
+              }}
+            >
+              <IconCalendar />
+              Meeting Calendar (Calendly)
+            </button>
+          </div>
 
-                {/* Row 1 — Name + Email */}
-                <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
-                  {/* Name */}
-                  <Field label="Your Name" icon={<IconUser />}>
-                    <div style={{ position: 'relative', flex: 1 }}>
-                      <input
-                        type="text"
-                        placeholder="Jack Doe"
-                        autoComplete="off"
-                        value={form.name}
-                        onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: '' }); }}
-                        style={{ ...nameField.style, paddingLeft: '18px' }}
-                        onFocus={nameField.onFocus}
-                        onBlur={nameField.onBlur}
-                      />
-                      {errors.name && <span style={errStyle}>{errors.name}</span>}
-                    </div>
-                  </Field>
-
-                  {/* Email — custom styled, no browser icon */}
-                  <Field label="Email Address" icon={<IconMail />}>
-                    <div style={{ position: 'relative', flex: 1 }}>
-                      <input
-                        type="text"          /* type="text" kills browser email icon entirely */
-                        inputMode="email"
-                        placeholder="you@company.com"
-                        autoComplete="off"
-                        autoCorrect="off"
-                        autoCapitalize="off"
-                        spellCheck={false}
-                        value={form.email}
-                        onChange={e => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: '' }); }}
-                        style={{ ...emailField.style }}
-                        onFocus={emailField.onFocus}
-                        onBlur={emailField.onBlur}
-                      />
-                      {errors.email && <span style={errStyle}>{errors.email}</span>}
-                    </div>
-                  </Field>
+          {/* ── TAB 1: FORM ── */}
+          {activeTab === 'form' && (
+            status === 'success' ? (
+              /* ── Success State ── */
+              <div style={{
+                textAlign: 'center', padding: '80px 40px',
+                border: '1px solid rgba(200,240,77,0.3)',
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(200,240,77,0.08), rgba(8,8,8,0.5))',
+                animation: 'fadeUp 0.5s ease',
+              }}>
+                <div style={{ color: 'var(--accent)', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+                  <IconCheck />
                 </div>
-
-                {/* Row 2 — Budget pills */}
-                <Field label="Budget Range" icon={<IconCoin />}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                    {budgets.map(b => (
-                      <button key={b} onClick={() => { setForm({ ...form, budget: b }); setErrors({ ...errors, budget: '' }); }}
-                        style={{
-                          padding: '11px 22px',
-                          borderRadius: '100px',
-                          border: form.budget === b
-                            ? '1px solid var(--accent)'
-                            : '1px solid rgba(255,255,255,0.1)',
-                          background: form.budget === b
-                            ? 'rgba(200,240,77,0.12)'
-                            : 'rgba(255,255,255,0.03)',
-                          color: form.budget === b ? 'var(--accent)' : 'var(--text-secondary)',
-                          fontFamily: 'var(--font-display)',
-                          fontWeight: form.budget === b ? 700 : 400,
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          letterSpacing: '0.02em',
-                        }}
-                        onMouseEnter={e => { if (form.budget !== b) e.currentTarget.style.borderColor = 'rgba(200,240,77,0.4)'; }}
-                        onMouseLeave={e => { if (form.budget !== b) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-                      >
-                        {b}
-                      </button>
-                    ))}
-                  </div>
-                  {errors.budget && <span style={{ ...errStyle, position: 'static', marginTop: '-4px' }}>{errors.budget}</span>}
-                </Field>
-
-                {/* Row 3 — Message */}
-                <Field label="Project Details" icon={<IconMsg />}>
-                  <div style={{ position: 'relative' }}>
-                    <textarea
-                      placeholder="What are you building? What's the timeline? Any specific requirements?"
-                      value={form.message}
-                      onChange={e => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: '' }); }}
-                      rows={5}
-                      style={{
-                        ...msgField.style,
-                        ...baseInput,
-                        borderColor: msgField.style.borderColor,
-                        boxShadow: msgField.style.boxShadow,
-                        background: msgField.style.background,
-                        resize: 'vertical',
-                        minHeight: '150px',
-                        lineHeight: 1.7,
-                      }}
-                      onFocus={msgField.onFocus}
-                      onBlur={msgField.onBlur}
-                    />
-                    {/* live char count */}
-                    <span style={{
-                      position: 'absolute', bottom: '14px', right: '16px',
-                      fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-display)',
-                      pointerEvents: 'none',
-                    }}>
-                      {form.message.length}
-                    </span>
-                    {errors.message && <span style={errStyle}>{errors.message}</span>}
-                  </div>
-                </Field>
-
-                {/* Submit */}
-                <button onClick={handleSubmit} style={{
-                  width: '100%',
-                  padding: '20px',
-                  background: 'var(--accent)',
-                  color: '#080808',
-                  borderRadius: '10px',
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 800,
-                  fontSize: '17px',
-                  cursor: 'pointer',
-                  border: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  letterSpacing: '-0.01em',
-                  transition: 'all 0.3s ease',
-                  marginTop: '4px',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(200,240,77,0.35)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px)'; }}
-                >
-                  Send Message <IconArrow />
-                </button>
-
-                <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--text-muted)', marginTop: '-8px' }}>
-                  No spam. We respond within 1 business day.
+                <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px', marginBottom: '12px', color: 'var(--accent)' }}>
+                  Message Sent Successfully!
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '440px', margin: '0 auto 32px', lineHeight: 1.6 }}>
+                  Thank you for reaching out. We've received your project details and our team will get back to you within 24 to 48 hours.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setStatus('idle')}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--accent)',
+                    background: 'transparent',
+                    color: 'var(--accent)',
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(200,240,77,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  Send Another Message
+                </button>
               </div>
+            ) : (
+              /* ── Form Card ── */
+              <div style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '20px',
+                padding: 'clamp(32px, 5vw, 56px)',
+                backdropFilter: 'blur(12px)',
+                animation: 'fadeIn 0.3s ease',
+              }}>
+                {/* suppress browser autofill styles globally for this block */}
+                <style>{`
+                  input:-webkit-autofill,
+                  input:-webkit-autofill:hover,
+                  input:-webkit-autofill:focus {
+                    -webkit-box-shadow: 0 0 0 1000px #111 inset !important;
+                    -webkit-text-fill-color: var(--text-primary) !important;
+                    caret-color: var(--text-primary);
+                  }
+                  input[type="email"]::-webkit-contacts-auto-fill-button,
+                  input[type="email"]::-webkit-credentials-auto-fill-button {
+                    visibility: hidden;
+                    display: none !important;
+                    pointer-events: none;
+                  }
+                  @media (max-width: 600px) { .form-row { flex-direction: column !important; } }
+                  @keyframes formSpin { to { transform: rotate(360deg); } }
+                `}</style>
+
+                {status === 'error' && (
+                  <div style={{
+                    padding: '14px 18px',
+                    borderRadius: '10px',
+                    background: 'rgba(255, 68, 68, 0.1)',
+                    border: '1px solid rgba(255, 68, 68, 0.3)',
+                    color: '#ff8888',
+                    fontSize: '14px',
+                    marginBottom: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                  }}>
+                    <span>{errorMessage || 'There was an issue sending your message. Please try again.'}</span>
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      style={{
+                        padding: '6px 14px',
+                        background: 'rgba(255,68,68,0.2)',
+                        border: '1px solid rgba(255,68,68,0.4)',
+                        borderRadius: '6px',
+                        color: '#fff',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+                  {/* Row 1 — Name + Email */}
+                  <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                    {/* Name */}
+                    <Field label="Your Name" icon={<IconUser />}>
+                      <div style={{ position: 'relative', flex: 1 }}>
+                        <input
+                          type="text"
+                          placeholder="Jack Doe"
+                          autoComplete="off"
+                          disabled={status === 'submitting'}
+                          value={form.name}
+                          onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: '' }); }}
+                          style={{ ...nameField.style, paddingLeft: '18px', opacity: status === 'submitting' ? 0.6 : 1 }}
+                          onFocus={nameField.onFocus}
+                          onBlur={nameField.onBlur}
+                        />
+                        {errors.name && <span style={errStyle}>{errors.name}</span>}
+                      </div>
+                    </Field>
+
+                    {/* Email */}
+                    <Field label="Email Address" icon={<IconMail />}>
+                      <div style={{ position: 'relative', flex: 1 }}>
+                        <input
+                          type="text"
+                          inputMode="email"
+                          placeholder="you@company.com"
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck={false}
+                          disabled={status === 'submitting'}
+                          value={form.email}
+                          onChange={e => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: '' }); }}
+                          style={{ ...emailField.style, opacity: status === 'submitting' ? 0.6 : 1 }}
+                          onFocus={emailField.onFocus}
+                          onBlur={emailField.onBlur}
+                        />
+                        {errors.email && <span style={errStyle}>{errors.email}</span>}
+                      </div>
+                    </Field>
+                  </div>
+
+                  {/* Row 2 — Budget pills */}
+                  <Field label="Budget Range" icon={<IconCoin />}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                      {budgets.map(b => (
+                        <button
+                          key={b}
+                          type="button"
+                          disabled={status === 'submitting'}
+                          onClick={() => { setForm({ ...form, budget: b }); setErrors({ ...errors, budget: '' }); }}
+                          style={{
+                            padding: '11px 22px',
+                            borderRadius: '100px',
+                            border: form.budget === b
+                              ? '1px solid var(--accent)'
+                              : '1px solid rgba(255,255,255,0.1)',
+                            background: form.budget === b
+                              ? 'rgba(200,240,77,0.12)'
+                              : 'rgba(255,255,255,0.03)',
+                            color: form.budget === b ? 'var(--accent)' : 'var(--text-secondary)',
+                            fontFamily: 'var(--font-display)',
+                            fontWeight: form.budget === b ? 700 : 400,
+                            fontSize: '14px',
+                            cursor: status === 'submitting' ? 'not-allowed' : 'pointer',
+                            transition: 'all 0.2s ease',
+                            letterSpacing: '0.02em',
+                            opacity: status === 'submitting' ? 0.6 : 1,
+                          }}
+                          onMouseEnter={e => { if (form.budget !== b && status !== 'submitting') e.currentTarget.style.borderColor = 'rgba(200,240,77,0.4)'; }}
+                          onMouseLeave={e => { if (form.budget !== b) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.budget && <span style={{ ...errStyle, position: 'static', marginTop: '-4px' }}>{errors.budget}</span>}
+                  </Field>
+
+                  {/* Row 3 — Message */}
+                  <Field label="Project Details" icon={<IconMsg />}>
+                    <div style={{ position: 'relative' }}>
+                      <textarea
+                        placeholder="What are you building? What's your timeline? Any specific tech requirements?"
+                        disabled={status === 'submitting'}
+                        value={form.message}
+                        onChange={e => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: '' }); }}
+                        rows={5}
+                        style={{
+                          ...msgField.style,
+                          ...baseInput,
+                          borderColor: msgField.style.borderColor,
+                          boxShadow: msgField.style.boxShadow,
+                          background: msgField.style.background,
+                          resize: 'vertical',
+                          minHeight: '150px',
+                          lineHeight: 1.7,
+                          opacity: status === 'submitting' ? 0.6 : 1,
+                        }}
+                        onFocus={msgField.onFocus}
+                        onBlur={msgField.onBlur}
+                      />
+                      <span style={{
+                        position: 'absolute', bottom: '14px', right: '16px',
+                        fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-display)',
+                        pointerEvents: 'none',
+                      }}>
+                        {form.message.length}
+                      </span>
+                      {errors.message && <span style={errStyle}>{errors.message}</span>}
+                    </div>
+                  </Field>
+
+                  {/* Submit button */}
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={status === 'submitting'}
+                    style={{
+                      width: '100%',
+                      padding: '20px',
+                      background: status === 'submitting' ? 'rgba(200,240,77,0.7)' : 'var(--accent)',
+                      color: '#080808',
+                      borderRadius: '10px',
+                      fontFamily: 'var(--font-display)',
+                      fontWeight: 800,
+                      fontSize: '17px',
+                      cursor: status === 'submitting' ? 'wait' : 'pointer',
+                      border: 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                      letterSpacing: '-0.01em',
+                      transition: 'all 0.3s ease',
+                      marginTop: '4px',
+                    }}
+                    onMouseEnter={e => {
+                      if (status !== 'submitting') {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 20px 50px rgba(200,240,77,0.35)';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {status === 'submitting' ? (
+                      <>
+                        <span style={{
+                          width: '18px', height: '18px',
+                          border: '2px solid #080808', borderTopColor: 'transparent',
+                          borderRadius: '50%', display: 'inline-block',
+                          animation: 'formSpin 0.7s linear infinite',
+                        }} />
+                        Sending Inquiry...
+                      </>
+                    ) : (
+                      <>
+                        Send Message <IconArrow />
+                      </>
+                    )}
+                  </button>
+
+                  <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--text-muted)', marginTop: '-8px' }}>
+                    No spam. We respond within 1 business day.
+                  </p>
+                </div>
+              </div>
+            )
+          )}
+
+          {/* ── TAB 2: CALENDLY EMBED ── */}
+          {activeTab === 'calendly' && (
+            <div style={{ animation: 'fadeIn 0.3s ease' }}>
+              <CalendlyEmbed url={contactConfig.calendlyUrl} />
             </div>
           )}
+
         </div>
       </div>
     </section>

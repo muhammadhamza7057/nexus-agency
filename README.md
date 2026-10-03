@@ -71,11 +71,16 @@ The included `vercel.json` already sets the build command and output directory.
 ## ✏️ Customizing Content
 
 All site content lives in `src/data/siteData.js`:
+- **contactConfig** — Set your recipient email, display email, and Calendly meeting URL
 - **services** — Edit titles, descriptions, and tech stacks
 - **testimonials** — Add/remove client quotes
 - **process** — Change the workflow steps
 - **faqs** — Update Q&A entries
 - **techStack** — Modify the scrolling ticker
+
+### 📬 Form Handling & Calendly Setup
+- **Contact Form**: Form inquiries are sent directly via AJAX (FormSubmit by default to `codingexpert098@gmail.com`). You can customize the destination or use a Formspree endpoint via `VITE_CONTACT_FORM_ENDPOINT` in `.env`.
+- **Calendly**: To connect your personal/team Calendly, update `calendlyUrl` in `src/data/siteData.js` or set `VITE_CALENDLY_URL` in `.env`.
 
 ## 🎨 Design Tokens
 
@@ -85,5 +90,7 @@ All colors, fonts, and spacing are CSS variables in `src/styles/globals.css`. To
 
 - `react` + `react-dom` — UI library
 - `react-router-dom` — Routing (ready for multi-page expansion)
+- `gsap` + `@gsap/react` — Smooth animations & custom interactive cursor
 - `lucide-react` — Icon library
 - `vite` — Build tool
+

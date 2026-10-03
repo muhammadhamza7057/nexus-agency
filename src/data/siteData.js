@@ -141,5 +141,11 @@ export const team = [
     bio: 'Builds robust web applications and integrates AI solutions to create intelligent, scalable products that solve real problems.',
     image: '/images/team/HAMZA.png',
   },
-  
 ];
+
+export const contactConfig = {
+  email: 'codingexpert098@gmail.com',
+  displayEmail: 'hello@nexus.studio',
+  calendlyUrl: 'https://calendly.com/nexus-agency/30min',
+  formEndpoint: 'https://formsubmit.co/ajax/codingexpert098@gmail.com',
+};
