@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { contactConfig } from '../../data/siteData';
 
 export default function CalendlyEmbed({ url = contactConfig.calendlyUrl }) {
+  const containerRef = useRef(null);
   const [loading, setLoading] = useState(true);
 
   // Append dark mode parameters matching our palette
@@ -20,18 +21,60 @@ export default function CalendlyEmbed({ url = contactConfig.calendlyUrl }) {
   })();
 
   useEffect(() => {
-    // Optionally load Calendly widget script if needed
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
-    document.body.appendChild(script);
+    let isMounted = true;
+    let fallbackTimer;
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+    const mountCalendly = () => {
+      if (!isMounted || !containerRef.current) return;
+
+      if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
+        containerRef.current.innerHTML = '';
+        window.Calendly.initInlineWidget({
+          url: darkCalendlyUrl,
+          parentElement: containerRef.current,
+        });
+        setLoading(false);
+      } else {
+        // In case script is still loading, wait a bit
+        fallbackTimer = setTimeout(mountCalendly, 250);
       }
     };
-  }, []);
+
+    // Ensure Calendly widget script is in document
+    const scriptSrc = 'https://assets.calendly.com/assets/external/widget.js';
+    let script = document.querySelector(`script[src="${scriptSrc}"]`);
+
+    if (!script) {
+      script = document.createElement('script');
+      script.src = scriptSrc;
+      script.type = 'text/javascript';
+      script.async = true;
+      script.onload = mountCalendly;
+      document.body.appendChild(script);
+    } else {
+      if (window.Calendly) {
+        mountCalendly();
+      } else {
+        script.addEventListener('load', mountCalendly);
+      }
+    }
+
+    // Safety fallback: if widget.js is blocked by ad-blocker after 3 seconds, show fallback iframe
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted && loading) {
+        setLoading(false);
+      }
+    }, 3000);
+
+    return () => {
+      isMounted = false;
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      if (safetyTimeout) clearTimeout(safetyTimeout);
+      if (script) {
+        script.removeEventListener('load', mountCalendly);
+      }
+    };
+  }, [darkCalendlyUrl]);
 
   return (
     <div style={{
@@ -73,7 +116,7 @@ export default function CalendlyEmbed({ url = contactConfig.calendlyUrl }) {
               30-Minute Discovery Call
             </div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-              1-on-1 strategy & technical consultation
+              1-on-1 strategy &amp; technical consultation
             </div>
           </div>
         </div>
@@ -112,7 +155,7 @@ export default function CalendlyEmbed({ url = contactConfig.calendlyUrl }) {
       {/* Loading Skeleton */}
       {loading && (
         <div style={{
-          minHeight: '650px',
+          minHeight: '680px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -139,21 +182,34 @@ export default function CalendlyEmbed({ url = contactConfig.calendlyUrl }) {
         </div>
       )}
 
-      {/* Calendly iFrame Embed */}
-      <iframe
-        src={darkCalendlyUrl}
-        width="100%"
-        height="680"
-        frameBorder="0"
-        title="Schedule a Call"
-        onLoad={() => setLoading(false)}
+      {/* Official Calendly Inline Widget Container */}
+      {/* <!-- Calendly inline widget begin --> */}
+      <div
+        ref={containerRef}
+        className="calendly-inline-widget"
+        data-url={darkCalendlyUrl}
         style={{
+          minWidth: '320px',
+          height: '700px',
+          width: '100%',
           borderRadius: '12px',
+          overflow: 'hidden',
           display: loading ? 'none' : 'block',
-          border: 'none',
-          minHeight: '680px',
         }}
-      />
+      >
+        {/* Fallback iframe in case script is disabled or blocked */}
+        <noscript>
+          <iframe
+            src={darkCalendlyUrl}
+            width="100%"
+            height="700"
+            frameBorder="0"
+            title="Schedule a Call with Nexus Studio"
+            style={{ borderRadius: '12px', minHeight: '700px', border: 'none' }}
+          />
+        </noscript>
+      </div>
+      {/* <!-- Calendly inline widget end --> */}
     </div>
   );
 }
