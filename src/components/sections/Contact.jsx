@@ -302,7 +302,7 @@ export default function Contact() {
               }}
             >
               <IconCalendar />
-              Meeting Calendar (Calendly)
+              Meeting Calendar
             </button>
           </div>
 
